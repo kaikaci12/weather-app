@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Image,
@@ -43,6 +43,9 @@ const HomeScreen = () => {
   };
   const handleTextDebaunce = useCallback(debounce(handleSearch, 1200), []);
   const { current, location } = weather;
+  useEffect(() => {
+    fetchWeatherForecast();
+  }, []);
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -145,18 +148,23 @@ const HomeScreen = () => {
           <Text style={styles.dailyForecastText}>Daily forecast</Text>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {weather?.forecast?.forecastday?.map((item, index) => (
-            <View style={styles.nextDay} key={index}>
-              <Image
-                style={styles.nextDayImage}
-                source={require("../assets/images/heavyrain.png")}
-              />
-              <Text style={styles.nextDayText}>{item.date}</Text>
-              <Text style={styles.nextDayTemp}>
-                {item?.day?.avgtemp_c}&#176;
-              </Text>
-            </View>
-          ))}
+          {weather?.forecast?.forecastday?.map((item, index) => {
+            let date = new Date(item.date);
+            let options = { weekday: "long" };
+            let dayName = date.toLocaleDateString("en-US", options);
+            return (
+              <View style={styles.nextDay} key={index}>
+                <Image
+                  style={styles.nextDayImage}
+                  source={weatherImages[item?.day?.condition?.text]}
+                />
+                <Text style={styles.nextDayText}>{dayName}</Text>
+                <Text style={styles.nextDayTemp}>
+                  {item?.day?.avgtemp_c}&#176;
+                </Text>
+              </View>
+            );
+          })}
         </ScrollView>
       </View>
     </SafeAreaView>
