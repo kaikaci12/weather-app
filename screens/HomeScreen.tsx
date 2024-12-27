@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Image,
@@ -15,15 +15,34 @@ import {
   MagnifyingGlassIcon,
 } from "react-native-heroicons/outline";
 import { MapPinIcon } from "react-native-heroicons/solid";
-
+import { debounce } from "lodash";
+import { fetchLocations, fetchWeatherForecast } from "@/api/weather";
+import { weatherImages } from "@/constants";
 const HomeScreen = () => {
   const [showSearch, toggleSearch] = useState(false);
-  const [locations, setLocations] = useState([1, 2, 3]);
+  const [locations, setLocations] = useState([]);
+  const [weather, setWeather] = useState({});
 
-  const handleLocation = (loc) => {
-    console.log(loc);
+  const handleSearch = (value: string) => {
+    if (value.length <= 2) {
+      return;
+    }
+    fetchLocations({ cityName: value }).then((data: any) => {
+      console.log("locations:", data);
+      setLocations(data);
+    });
   };
-
+  const handleLocation = (loc) => {
+    console.log("forecastt: ", loc);
+    setLocations([]);
+    toggleSearch(false);
+    fetchWeatherForecast({ cityName: loc.name, days: "7" }).then((data) => {
+      console.log("weather data", data);
+      setWeather(data);
+    });
+  };
+  const handleTextDebaunce = useCallback(debounce(handleSearch, 1200), []);
+  const { current, location } = weather;
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -36,6 +55,7 @@ const HomeScreen = () => {
         <View style={styles.searchContainer}>
           {showSearch && (
             <TextInput
+              onChangeText={handleTextDebaunce}
               placeholderTextColor={"lightgray"}
               placeholder="Search city"
               style={styles.input}
@@ -66,7 +86,9 @@ const HomeScreen = () => {
                   >
                     <View style={styles.locationContent}>
                       <MapPinIcon size="25" color="gray" />
-                      <Text style={styles.locationText}>USA, Los Angeles</Text>
+                      <Text style={styles.locationText}>
+                        {loc?.name},{loc?.country}
+                      </Text>
                     </View>
                   </TouchableOpacity>
                 );
@@ -77,18 +99,20 @@ const HomeScreen = () => {
       </View>
       <View style={styles.forecastContainer}>
         <Text style={styles.cityText}>
-          London,
-          <Text style={styles.countryText}> United Kingdom</Text>
+          {location.name}
+          <Text style={styles.countryText}> {" " + location?.country}</Text>
         </Text>
         <View style={styles.weatherImageContainer}>
           <Image
             style={styles.weatherImage}
-            source={require("../assets/images/partlycloudy.png")}
+            source={weatherImages[current?.condition?.text]}
           />
         </View>
         <View style={styles.weatherDetails}>
-          <Text style={styles.temperatureText}>23&#176;</Text>
-          <Text style={styles.weatherDescription}>Partly Cloudy</Text>
+          <Text style={styles.temperatureText}>{current?.temp_c}&#176;</Text>
+          <Text style={styles.weatherDescription}>
+            {current?.condition?.text}
+          </Text>
         </View>
         <View style={styles.otherStatsContainer}>
           <View style={styles.statItem}>
@@ -96,14 +120,14 @@ const HomeScreen = () => {
               style={styles.statIcon}
               source={require("../assets/icons/wind.png")}
             />
-            <Text style={styles.statValue}>22km</Text>
+            <Text style={styles.statValue}>{current?.wind_kph}km</Text>
           </View>
           <View style={styles.statItem}>
             <Image
               style={styles.statIcon}
               source={require("../assets/icons/drop.png")}
             />
-            <Text style={styles.statValue}>23%</Text>
+            <Text style={styles.statValue}>{current?.humidity}%</Text>
           </View>
           <View style={styles.statItem}>
             <Image
@@ -121,14 +145,16 @@ const HomeScreen = () => {
           <Text style={styles.dailyForecastText}>Daily forecast</Text>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {[...Array(8)].map((_, index) => (
+          {weather?.forecast?.forecastday?.map((item, index) => (
             <View style={styles.nextDay} key={index}>
               <Image
                 style={styles.nextDayImage}
                 source={require("../assets/images/heavyrain.png")}
               />
-              <Text style={styles.nextDayText}>Monday</Text>
-              <Text style={styles.nextDayTemp}>23&#176;</Text>
+              <Text style={styles.nextDayText}>{item.date}</Text>
+              <Text style={styles.nextDayTemp}>
+                {item?.day?.avgtemp_c}&#176;
+              </Text>
             </View>
           ))}
         </ScrollView>
@@ -188,6 +214,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 4,
+    zIndex: 999,
   },
   locationItem: {
     flexDirection: "row",
