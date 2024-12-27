@@ -8,8 +8,12 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
+  ScrollView,
 } from "react-native";
-import { MagnifyingGlassIcon } from "react-native-heroicons/outline";
+import {
+  CalendarDaysIcon,
+  MagnifyingGlassIcon,
+} from "react-native-heroicons/outline";
 import { MapPinIcon } from "react-native-heroicons/solid";
 
 const HomeScreen = () => {
@@ -19,6 +23,7 @@ const HomeScreen = () => {
   const handleLocation = (loc) => {
     console.log(loc);
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -41,7 +46,7 @@ const HomeScreen = () => {
             style={styles.searchButton}
             onPress={() => toggleSearch(!showSearch)}
           >
-            <MagnifyingGlassIcon size="25" color={"white"} />
+            <MagnifyingGlassIcon size={25} color={"white"} />
           </TouchableOpacity>
 
           {/* Locations Container */}
@@ -59,16 +64,9 @@ const HomeScreen = () => {
                     key={index}
                     style={[styles.locationItem, borderClass]}
                   >
-                    <View
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        gap: 5,
-                        alignItems: "center",
-                      }}
-                    >
+                    <View style={styles.locationContent}>
                       <MapPinIcon size="25" color="gray" />
-                      <Text style={styles.locationText}>USA,Los Angeles</Text>
+                      <Text style={styles.locationText}>USA, Los Angeles</Text>
                     </View>
                   </TouchableOpacity>
                 );
@@ -78,90 +76,62 @@ const HomeScreen = () => {
         </View>
       </View>
       <View style={styles.forecastContainer}>
-        <Text
-          style={{
-            color: "white",
-            textAlign: "center",
-            fontSize: 30,
-            fontWeight: "bold",
-          }}
-        >
+        <Text style={styles.cityText}>
           London,
-          <Text style={{ fontSize: 20, color: "gray", fontWeight: "semibold" }}>
-            United Kingdom
-          </Text>
+          <Text style={styles.countryText}> United Kingdom</Text>
         </Text>
-        {/*weather image */}
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "center",
-          }}
-        >
+        <View style={styles.weatherImageContainer}>
           <Image
-            height={208}
-            width={208}
-            style={{ height: 208, width: 208 }}
+            style={styles.weatherImage}
             source={require("../assets/images/partlycloudy.png")}
           />
         </View>
-        <View style={{ flexDirection: "column", gap: 5, alignItems: "center" }}>
-          <Text style={{ color: "white", fontSize: 50, fontWeight: "bold" }}>
-            23&#176;
-          </Text>
-          <Text
-            style={{
-              color: "white",
-              fontSize: 17,
-              fontWeight: "light",
-              letterSpacing: 0.5,
-            }}
-          >
-            Partly Cloudy
-          </Text>
+        <View style={styles.weatherDetails}>
+          <Text style={styles.temperatureText}>23&#176;</Text>
+          <Text style={styles.weatherDescription}>Partly Cloudy</Text>
         </View>
         <View style={styles.otherStatsContainer}>
-          <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+          <View style={styles.statItem}>
             <Image
-              height={24}
-              width={24}
-              style={{ height: 24, width: 24 }}
+              style={styles.statIcon}
               source={require("../assets/icons/wind.png")}
             />
-            <Text
-              style={{ color: "white", fontWeight: "semibold", fontSize: 20 }}
-            >
-              22km
-            </Text>
+            <Text style={styles.statValue}>22km</Text>
           </View>
-          <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+          <View style={styles.statItem}>
             <Image
-              height={24}
-              width={24}
-              style={{ height: 24, width: 24 }}
-              source={require("../assets/icons/wind.png")}
+              style={styles.statIcon}
+              source={require("../assets/icons/drop.png")}
             />
-            <Text
-              style={{ color: "white", fontWeight: "semibold", fontSize: 20 }}
-            >
-              23%
-            </Text>
+            <Text style={styles.statValue}>23%</Text>
           </View>
-          <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+          <View style={styles.statItem}>
             <Image
-              height={24}
-              width={24}
-              style={{ height: 24, width: 24 }}
-              source={require("../assets/icons/wind.png")}
+              style={styles.statIcon}
+              source={require("../assets/icons/sun.png")}
             />
-            <Text
-              style={{ color: "white", fontWeight: "semibold", fontSize: 20 }}
-            >
-              8am
-            </Text>
+            <Text style={styles.statValue}>8am</Text>
           </View>
         </View>
+      </View>
+      {/* Next days */}
+      <View style={styles.nextDaysContainer}>
+        <View style={styles.dailyForecastHeader}>
+          <CalendarDaysIcon size={22} color="white" />
+          <Text style={styles.dailyForecastText}>Daily forecast</Text>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {[...Array(8)].map((_, index) => (
+            <View style={styles.nextDay} key={index}>
+              <Image
+                style={styles.nextDayImage}
+                source={require("../assets/images/heavyrain.png")}
+              />
+              <Text style={styles.nextDayText}>Monday</Text>
+              <Text style={styles.nextDayTemp}>23&#176;</Text>
+            </View>
+          ))}
+        </ScrollView>
       </View>
     </SafeAreaView>
   );
@@ -180,16 +150,17 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: "flex-start", // Align to the top
+    justifyContent: "flex-start",
     alignItems: "center",
-    paddingTop: 20, // Padding to give space from the top
+    paddingTop: 20,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     borderRadius: 40,
-    width: "100%", // Adjust width to your needs
+    width: "100%",
     paddingHorizontal: 10,
+    position: "relative",
   },
   input: {
     flex: 1,
@@ -219,31 +190,119 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   locationItem: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
+    borderBottomWidth: 1,
     borderBottomColor: "black",
   },
+  locationContent: {
+    flexDirection: "row",
+    gap: 5,
+    alignItems: "center",
+  },
   locationText: {
-    fontSize: 20,
-
+    fontSize: 18,
     color: "#333",
   },
   forecastContainer: {
     width: "100%",
-    display: "flex",
-    flexDirection: "column",
     alignItems: "center",
     marginBottom: 20,
-    justifyContent: "space-around",
-
     paddingHorizontal: 40,
   },
+  cityText: {
+    color: "white",
+    textAlign: "center",
+    fontSize: 30,
+    fontWeight: "bold",
+  },
+  countryText: {
+    fontSize: 20,
+    color: "gray",
+    fontWeight: "semibold",
+  },
+  weatherImageContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  weatherImage: {
+    height: 208,
+    width: 208,
+  },
+  weatherDetails: {
+    flexDirection: "column",
+    gap: 5,
+    alignItems: "center",
+  },
+  temperatureText: {
+    color: "white",
+    fontSize: 50,
+    fontWeight: "bold",
+  },
+  weatherDescription: {
+    color: "white",
+    fontSize: 17,
+    fontWeight: "light",
+    letterSpacing: 0.5,
+  },
   otherStatsContainer: {
+    marginTop: 50,
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
+  },
+  statItem: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+  },
+  statIcon: {
+    height: 24,
+    width: 24,
+  },
+  statValue: {
+    color: "white",
+    fontWeight: "semibold",
+    fontSize: 20,
+  },
+  nextDaysContainer: {
+    flexDirection: "column",
+    gap: 16,
+    paddingHorizontal: 40,
+  },
+  dailyForecastHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  dailyForecastText: {
+    color: "white",
+    fontSize: 16,
+  },
+  nextDay: {
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    width: 88,
+    borderRadius: 33,
+    paddingVertical: 12,
+    marginRight: 10,
+    backgroundColor: "gray",
+  },
+  nextDayImage: {
+    width: 48,
+    height: 48,
+  },
+  nextDayText: {
+    color: "white",
+    textAlign: "center",
+  },
+  nextDayTemp: {
+    color: "white",
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
