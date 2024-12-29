@@ -37,8 +37,9 @@ const HomeScreen = () => {
     });
   };
   const handleLocation = (loc) => {
-    console.log("forecastt: ", loc);
+    console.log("locations ", loc);
     setLocations([]);
+
     toggleSearch(false);
     setLoading(true);
     fetchWeatherForecast({ cityName: loc.name, days: "7" }).then((data) => {
@@ -49,7 +50,7 @@ const HomeScreen = () => {
   };
   const handleTextDebaunce = useCallback(debounce(handleSearch, 1200), []);
   useEffect(() => {
-    fetchWeatherForecast({ cityName: "Zestafoni", days: "7" }).then((data) => {
+    fetchWeatherForecast({ cityName: "Tbilisi", days: "7" }).then((data) => {
       console.log("weather data", data);
       setWeather(data);
       setLoading(false);
@@ -92,16 +93,11 @@ const HomeScreen = () => {
               {locations.length > 0 && showSearch && (
                 <View style={styles.locationsContainer}>
                   {locations.map((loc, index) => {
-                    let showBorder = index + 1 !== locations.length;
-                    let borderClass = showBorder
-                      ? { borderBottomWidth: 1, borderBottomColor: "black" }
-                      : {};
-
                     return (
                       <TouchableOpacity
                         onPress={() => handleLocation(loc)}
                         key={index}
-                        style={[styles.locationItem, borderClass]}
+                        style={styles.locationItem}
                       >
                         <View style={styles.locationContent}>
                           <MapPinIcon size="25" color="gray" />
@@ -250,11 +246,14 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: "black",
+    zIndex: 1,
+    cursor: "pointer",
   },
   locationContent: {
     flexDirection: "row",
     gap: 5,
     alignItems: "center",
+    zIndex: 999,
   },
   locationText: {
     fontSize: 18,
