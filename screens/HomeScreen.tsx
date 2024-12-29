@@ -29,28 +29,33 @@ const HomeScreen = () => {
     if (value.length <= 2) {
       return;
     }
+
     fetchLocations({ cityName: value }).then((data: any) => {
       console.log("locations:", data);
       setLocations(data);
+      setLoading(false);
     });
   };
   const handleLocation = (loc) => {
     console.log("forecastt: ", loc);
     setLocations([]);
     toggleSearch(false);
+    setLoading(true);
     fetchWeatherForecast({ cityName: loc.name, days: "7" }).then((data) => {
       console.log("weather data", data);
       setWeather(data);
+      setLoading(false);
     });
   };
   const handleTextDebaunce = useCallback(debounce(handleSearch, 1200), []);
-  const { current, location } = weather;
   useEffect(() => {
     fetchWeatherForecast({ cityName: "Zestafoni", days: "7" }).then((data) => {
       console.log("weather data", data);
       setWeather(data);
+      setLoading(false);
     });
   }, []);
+  const { current, location } = weather || [];
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -113,7 +118,7 @@ const HomeScreen = () => {
           </View>
           <View style={styles.forecastContainer}>
             <Text style={styles.cityText}>
-              {location.name}
+              {location?.name}
               <Text style={styles.countryText}> {" " + location?.country}</Text>
             </Text>
             <View style={styles.weatherImageContainer}>
